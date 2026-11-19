@@ -60,3 +60,33 @@ def write_metadata(frames, path, video_path="") -> Path:
     }
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
     return path
+
+
+def make_contact_sheet(frames, path, columns=4, thumb_size=(320, 240)) -> Path:
+    """Lay frames out in a grid on one image, with Pillow.
+
+    Each thumbnail is labelled with its timestamp. Returns the
+    path written.
+    """
+    from PIL import Image, ImageDraw
+
+    if not frames:
+        raise ValueError("No frames to put on a contact sheet")
+    rows = (len(frames) + columns - 1) // columns
+    thumb_w, thumb_h = thumb_size
+    label_h = 20
+    sheet = Image.new(
+        "RGB", (columns * thumb_w, rows * (thumb_h + label_h)), "white"
+    )
+    draw = ImageDraw.Draw(sheet)
+    for i, frame in enumerate(frames):
+        rgb = cv2.cvtColor(frame.image, cv2.COLOR_BGR2RGB)
+        thumb = Image.fromarray(rgb).resize((thumb_w, thumb_h))
+        x = (i % columns) * thumb_w
+        y = (i // columns) * (thumb_h + label_h)
+        sheet.paste(thumb, (x, y))
+        draw.text((x + 4, y + thumb_h + 3), f"{frame.timestamp:.2f}s", fill="black")
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(path)
+    return path

@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from frameforge.models import Frame
-from frameforge.saving import save_frame, save_frames, write_metadata
+from frameforge.saving import make_contact_sheet, save_frame, save_frames, write_metadata
 
 
 def a_frame(index=0):
@@ -43,3 +43,18 @@ def test_write_metadata_json(tmp_path):
     assert data["frame_count"] == 1
     assert data["frames"][0]["index"] == 3
     assert data["frames"][0]["scores"]["sharpness"] == 120.5
+
+
+def test_make_contact_sheet_lays_frames_in_a_grid(tmp_path):
+    from PIL import Image
+
+    frames = [a_frame(i) for i in range(5)]
+    path = make_contact_sheet(frames, tmp_path / "sheet.png", columns=2)
+    image = Image.open(path)
+    assert image.size == (640, 3 * 260)  # 2 columns, 3 rows
+    assert path.exists()
+
+
+def test_make_contact_sheet_needs_frames(tmp_path):
+    with pytest.raises(ValueError):
+        make_contact_sheet([], tmp_path / "sheet.png")

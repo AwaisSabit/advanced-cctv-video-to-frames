@@ -72,3 +72,36 @@ def zoom_levels(image: np.ndarray, factors=(1.0, 1.5, 2.0, 4.0)):
         else:
             views[factor] = zoom_centre(image, factor)
     return views
+
+
+def pan(image: np.ndarray, factor: float, dx: int, dy: int) -> np.ndarray:
+    """Move the zoom window by ``dx``/``dy`` pixels and zoom in.
+
+    The window starts centred, is shifted by the pan amounts,
+    and is clamped inside the frame. The result is enlarged back
+    to the full frame size.
+    """
+    if factor <= 1:
+        raise ValueError("Zoom factor must be more than 1")
+    height, width = image.shape[:2]
+    w, h = int(width / factor), int(height / factor)
+    x = (width - w) // 2 + dx
+    y = (height - h) // 2 + dy
+    return zoom_in(image, x, y, w, h, output_size=(width, height))
+
+
+def pan_path(image: np.ndarray, factor: float, steps=5):
+    """Sweep the zoom window left to right in ``steps`` views.
+
+    Returns one enlarged view per step, for scanning across a
+    wide scene such as a car park or a street.
+    """
+    height, width = image.shape[:2]
+    w = int(width / factor)
+    max_dx = (width - w) // 2
+    if steps < 2:
+        return [pan(image, factor, 0, 0)]
+    return [
+        pan(image, factor, int(-max_dx + 2 * max_dx * i / (steps - 1)), 0)
+        for i in range(steps)
+    ]

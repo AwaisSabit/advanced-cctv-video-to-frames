@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from frameforge.zoom import zoom_centre, zoom_in, zoom_levels, zoom_out
+from frameforge.zoom import pan, pan_path, zoom_centre, zoom_in, zoom_levels, zoom_out
 
 
 def test_image():
@@ -50,3 +50,23 @@ def test_zoom_levels_cover_full_and_zoomed_views():
     assert views[1.0].shape == test_image().shape
     assert views[4.0].shape == test_image().shape
     assert not np.array_equal(views[4.0], test_image())
+
+
+def test_pan_moves_the_zoom_window():
+    left = pan(test_image(), 2.0, -60, 0)
+    right = pan(test_image(), 2.0, 60, 0)
+    assert left.shape == test_image().shape
+    assert right.shape == test_image().shape
+    assert not np.array_equal(left, right)
+
+
+def test_pan_clamps_at_the_frame_edge():
+    panned = pan(test_image(), 2.0, 10000, 10000)
+    assert panned.shape == test_image().shape
+
+
+def test_pan_path_sweeps_left_to_right():
+    views = pan_path(test_image(), 2.0, steps=3)
+    assert len(views) == 3
+    assert all(v.shape == test_image().shape for v in views)
+    assert not np.array_equal(views[0], views[2])

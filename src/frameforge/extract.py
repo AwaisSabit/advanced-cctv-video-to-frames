@@ -51,3 +51,27 @@ def extract_by_range(video, start_seconds, end_seconds, every_seconds=None):
 def extract_at_timestamps(video, timestamps):
     """Pick the frame closest to each timestamp in seconds."""
     return [video.frame_at_time(float(t)) for t in timestamps]
+
+
+def detect_scene_changes(video, threshold=0.3):
+    """Find frames where the picture changes suddenly (a cut).
+
+    Compares the mean absolute difference between consecutive
+    frames; a frame is a scene change when the difference is
+    above ``threshold`` times the maximum possible difference.
+    Returns the frames just after each cut.
+    """
+    import cv2
+    import numpy as np
+
+    cuts = []
+    previous = None
+    for frame in video.iter_frames():
+        grey = cv2.cvtColor(frame.image, cv2.COLOR_BGR2GRAY)
+        small = cv2.resize(grey, (80, 60))
+        if previous is not None:
+            diff = float(np.mean(cv2.absdiff(small, previous))) / 255.0
+            if diff > threshold:
+                cuts.append(frame)
+        previous = small
+    return cuts

@@ -3,6 +3,7 @@
 import pytest
 
 from frameforge.extract import (
+    detect_scene_changes,
     extract_at_timestamps,
     extract_by_interval,
     extract_by_range,
@@ -57,3 +58,20 @@ def test_extract_at_timestamps(sample_video):
     frames = extract_at_timestamps(video, [0.0, 1.5, 2.9])
     assert [f.index for f in frames] == [0, 15, 29]
     assert frames[1].timestamp == pytest.approx(1.5)
+
+
+def test_scene_change_detection_finds_a_cut(tmp_path):
+    from tests.conftest import make_video, plain_frame
+
+    dark = [plain_frame(colour=(30, 30, 30)) for _ in range(10)]
+    bright = [plain_frame(colour=(220, 220, 220)) for _ in range(10)]
+    path = make_video(tmp_path / "cut.avi", dark + bright, fps=10)
+    video = VideoFile(path)
+    cuts = detect_scene_changes(video)
+    assert [f.index for f in cuts] == [10]
+
+
+def test_scene_change_detection_ignores_a_steady_video(sample_video):
+    video = VideoFile(sample_video)
+    cuts = detect_scene_changes(video, threshold=0.9)
+    assert cuts == []

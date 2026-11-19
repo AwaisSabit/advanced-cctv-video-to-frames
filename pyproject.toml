@@ -34,7 +34,7 @@ test = ["pytest>=8"]
 frameforge = "frameforge.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/AwaisSabit/advanced-video-to-frames"
+Homepage = "https://github.com/AwaisSabit/advanced-cctv-video-to-frames"
 
 [tool.setuptools.packages.find]
 where = ["src"]

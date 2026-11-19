@@ -47,8 +47,8 @@ matters.
 Requires Python 3.11 or newer.
 
 ```bash
-git clone https://github.com/AwaisSabit/advanced-video-to-frames.git
-cd advanced-video-to-frames
+git clone https://github.com/AwaisSabit/advanced-cctv-video-to-frames.git
+cd advanced-cctv-video-to-frames
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e .[test]           # editable install, including pytest

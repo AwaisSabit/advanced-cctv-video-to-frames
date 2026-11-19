@@ -5,7 +5,13 @@ import numpy as np
 import pytest
 
 from frameforge.models import Frame
-from frameforge.quality import blur_score, clear_frames, score_frame
+from frameforge.quality import (
+    blur_score,
+    brightness_score,
+    clear_frames,
+    contrast_score,
+    score_frame,
+)
 
 
 def sharp_image():
@@ -42,3 +48,24 @@ def test_clear_filtering_keeps_sharp_and_drops_blurred():
     kept = clear_frames([sharp, blurred], min_sharpness=100.0)
     assert [f.index for f in kept] == [0]
     assert kept[0].scores["sharpness"] > 100.0
+
+
+def test_brightness_score_is_higher_for_a_bright_frame():
+    dark = np.full((100, 100, 3), 30, dtype=np.uint8)
+    bright = np.full((100, 100, 3), 220, dtype=np.uint8)
+    assert brightness_score(bright) > brightness_score(dark)
+    assert brightness_score(bright) == pytest.approx(220.0)
+
+
+def test_contrast_score_is_higher_for_a_varied_frame():
+    flat = np.full((100, 100, 3), 128, dtype=np.uint8)
+    assert contrast_score(sharp_image()) > contrast_score(flat)
+    assert contrast_score(flat) == pytest.approx(0.0)
+
+
+def test_score_frame_reports_all_three_scores():
+    frame = Frame(image=sharp_image(), index=0, timestamp=0.0)
+    scores = score_frame(frame)
+    assert scores.brightness == pytest.approx(127.5, abs=1.0)
+    assert scores.contrast > 0
+    assert scores.sharpness > 0

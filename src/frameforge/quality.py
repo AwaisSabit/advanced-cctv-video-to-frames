@@ -16,11 +16,24 @@ def blur_score(image: np.ndarray) -> float:
     return float(cv2.Laplacian(grey, cv2.CV_64F).var())
 
 
+def brightness_score(image: np.ndarray) -> float:
+    """Mean grey level, 0 (black) to 255 (white)."""
+    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return float(np.mean(grey))
+
+
+def contrast_score(image: np.ndarray) -> float:
+    """Standard deviation of grey levels: a flat frame scores low."""
+    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return float(np.std(grey))
+
+
 def score_frame(frame: Frame) -> QualityScores:
-    """Score one frame for sharpness (brightness and contrast
-    arrive in a later step)."""
+    """Score one frame for sharpness, brightness and contrast."""
     return QualityScores(
-        sharpness=blur_score(frame.image), brightness=0.0, contrast=0.0
+        sharpness=blur_score(frame.image),
+        brightness=brightness_score(frame.image),
+        contrast=contrast_score(frame.image),
     )
 
 

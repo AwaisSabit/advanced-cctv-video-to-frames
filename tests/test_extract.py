@@ -3,6 +3,7 @@
 import pytest
 
 from frameforge.extract import (
+    detect_motion,
     detect_scene_changes,
     extract_at_timestamps,
     extract_by_interval,
@@ -75,3 +76,19 @@ def test_scene_change_detection_ignores_a_steady_video(sample_video):
     video = VideoFile(sample_video)
     cuts = detect_scene_changes(video, threshold=0.9)
     assert cuts == []
+
+
+def test_motion_detection_finds_moving_frames(sample_video):
+    video = VideoFile(sample_video)  # rectangle moves every frame
+    moving = detect_motion(video)
+    assert len(moving) > 0
+    assert moving[0].index == 1
+
+
+def test_motion_detection_skips_a_still_video(tmp_path):
+    from tests.conftest import make_video, plain_frame
+
+    still = [plain_frame() for _ in range(10)]
+    path = make_video(tmp_path / "still.avi", still, fps=10)
+    video = VideoFile(path)
+    assert detect_motion(video) == []

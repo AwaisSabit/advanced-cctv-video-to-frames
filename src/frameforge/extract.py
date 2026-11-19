@@ -75,3 +75,26 @@ def detect_scene_changes(video, threshold=0.3):
                 cuts.append(frame)
         previous = small
     return cuts
+
+
+def detect_motion(video, threshold=25, min_pixels=500):
+    """Find frames where something moved.
+
+    Compares each frame with the previous one; a frame counts as
+    motion when more than ``min_pixels`` pixels changed by more
+    than ``threshold`` grey levels.
+    """
+    import cv2
+    import numpy as np
+
+    moving = []
+    previous = None
+    for frame in video.iter_frames():
+        grey = cv2.cvtColor(frame.image, cv2.COLOR_BGR2GRAY)
+        if previous is not None:
+            diff = cv2.absdiff(grey, previous)
+            changed = int(np.count_nonzero(diff > threshold))
+            if changed >= min_pixels:
+                moving.append(frame)
+        previous = grey
+    return moving

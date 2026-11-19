@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from frameforge.models import Frame
-from frameforge.quality import blur_score, score_frame
+from frameforge.quality import blur_score, clear_frames, score_frame
 
 
 def sharp_image():
@@ -30,3 +30,15 @@ def test_score_frame_reports_sharpness():
     scores = score_frame(frame)
     assert scores.sharpness == pytest.approx(blur_score(sharp_image()))
     assert scores.is_clear
+
+
+def test_clear_filtering_keeps_sharp_and_drops_blurred():
+    sharp = Frame(image=sharp_image(), index=0, timestamp=0.0)
+    blurred = Frame(
+        image=cv2.GaussianBlur(sharp_image(), (21, 21), 0),
+        index=1,
+        timestamp=0.1,
+    )
+    kept = clear_frames([sharp, blurred], min_sharpness=100.0)
+    assert [f.index for f in kept] == [0]
+    assert kept[0].scores["sharpness"] > 100.0

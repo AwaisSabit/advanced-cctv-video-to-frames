@@ -22,3 +22,21 @@ def score_frame(frame: Frame) -> QualityScores:
     return QualityScores(
         sharpness=blur_score(frame.image), brightness=0.0, contrast=0.0
     )
+
+
+def clear_frames(frames, min_sharpness=100.0):
+    """Keep only the sharp frames, dropping blurred ones.
+
+    Each kept frame gets its scores attached in ``frame.scores``.
+    """
+    kept = []
+    for frame in frames:
+        scores = score_frame(frame)
+        frame.scores = {
+            "sharpness": scores.sharpness,
+            "brightness": scores.brightness,
+            "contrast": scores.contrast,
+        }
+        if scores.sharpness >= min_sharpness:
+            kept.append(frame)
+    return kept

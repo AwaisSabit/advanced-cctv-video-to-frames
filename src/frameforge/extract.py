@@ -22,3 +22,27 @@ def extract_by_interval(video, every_seconds=None, every_nth=None):
     return [
         frame for frame in video.iter_frames() if frame.index % step == 0
     ]
+
+
+def extract_by_range(video, start_seconds, end_seconds, every_seconds=None):
+    """Pick frames between two timestamps, optionally every N seconds."""
+    if start_seconds < 0 or end_seconds < start_seconds:
+        raise ValueError("Bad time range: start must be >= 0 and end >= start")
+    if end_seconds > video.metadata.duration_seconds:
+        raise ValueError("End time is past the end of the video")
+    start_index = int(start_seconds * video.metadata.fps)
+    end_index = min(
+        int(end_seconds * video.metadata.fps), video.metadata.frame_count - 1
+    )
+    step = 1
+    if every_seconds is not None:
+        if every_seconds <= 0:
+            raise ValueError("every_seconds must be positive")
+        step = max(1, int(round(every_seconds * video.metadata.fps)))
+    frames = []
+    for frame in video.iter_frames():
+        if frame.index < start_index or frame.index > end_index:
+            continue
+        if (frame.index - start_index) % step == 0:
+            frames.append(frame)
+    return frames

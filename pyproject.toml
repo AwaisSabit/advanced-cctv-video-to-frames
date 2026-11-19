@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "frameforge"
+version = "1.0.0"
+description = "An advanced video to frames tool for CCTV footage: extract clear frames, zoom in and out, enhance low light, and build contact sheets."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Awais Sabit", email = "awaissabit@gmail.com"}]
+keywords = ["video", "cctv", "frames", "opencv", "zoom", "enhancement", "cli", "python"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "opencv-python-headless>=4",
+    "numpy>=1.26",
+    "Pillow>=10",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+frameforge = "frameforge.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/AwaisSabit/advanced-video-to-frames"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

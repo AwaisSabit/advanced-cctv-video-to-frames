@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from frameforge.enhance import denoise, enhance, sharpen
+from frameforge.enhance import denoise, enhance, gamma_correct, low_light, sharpen
 
 
 def noisy_image(seed=7):
@@ -44,3 +44,17 @@ def test_enhance_changes_pixels_without_changing_size():
 def test_sharpen_rejects_zero_strength():
     with pytest.raises(ValueError):
         sharpen(edge_image(), 0)
+
+
+def test_low_light_brightens_a_dark_frame():
+    dark = np.full((100, 100, 3), 20, dtype=np.uint8)
+    dark[20:60, 20:60] = 60  # a slightly brighter object
+    out = low_light(dark)
+    assert out.shape == dark.shape
+    assert float(out.mean()) > float(dark.mean()) + 10
+
+
+def test_gamma_correct_brightens_a_dark_frame():
+    dark = np.full((100, 100, 3), 40, dtype=np.uint8)
+    out = gamma_correct(dark, gamma=2.0)
+    assert float(out.mean()) > float(dark.mean())

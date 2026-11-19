@@ -46,3 +46,8 @@ def extract_by_range(video, start_seconds, end_seconds, every_seconds=None):
         if (frame.index - start_index) % step == 0:
             frames.append(frame)
     return frames
+
+
+def extract_at_timestamps(video, timestamps):
+    """Pick the frame closest to each timestamp in seconds."""
+    return [video.frame_at_time(float(t)) for t in timestamps]

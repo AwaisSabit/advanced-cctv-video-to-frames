@@ -2,7 +2,11 @@
 
 import pytest
 
-from frameforge.extract import extract_by_interval, extract_by_range
+from frameforge.extract import (
+    extract_at_timestamps,
+    extract_by_interval,
+    extract_by_range,
+)
 from frameforge.video import VideoFile
 
 
@@ -46,3 +50,10 @@ def test_extract_by_range_rejects_bad_range(sample_video):
         extract_by_range(video, 2.0, 1.0)
     with pytest.raises(ValueError):
         extract_by_range(video, 0.0, 99.0)
+
+
+def test_extract_at_timestamps(sample_video):
+    video = VideoFile(sample_video)
+    frames = extract_at_timestamps(video, [0.0, 1.5, 2.9])
+    assert [f.index for f in frames] == [0, 15, 29]
+    assert frames[1].timestamp == pytest.approx(1.5)
